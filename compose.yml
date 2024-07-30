@@ -22,19 +22,20 @@ services:
     image: gitea/gitea:@version@
     container_name: "gitea-1"
     restart: always
+    depends_on:
+      - db
     networks:
       - traefik-proxy
       - gitea
-    volumes:
-      - gitea:/data
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
     ports:
       - "3000:3000"
       - "222:22"
     #labels:
       #- 
     environment:
+      - TZ=America/Chicago
+      - LC_TIME=C.UTF-8
+      - LANG=en_US.UTF-8
       - USER_UID=1000
       - USER_GID=1000
       - GITEA__database__DB_TYPE=mysql
@@ -42,8 +43,17 @@ services:
       - GITEA__database__NAME=gitea
       - GITEA__database__USER=gitea
       - GITEA__database__PASSWD=gitea
-    depends_on:
-      - db
+      - GITEA__mailer__ENABLED=true
+      - GITEA__mailer__FROM=${GITEA__mailer__FROM:?GITEA__mailer__FROM not set}
+      - GITEA__mailer__PROTOCOL=smtps
+      - GITEA__mailer__SMTP_ADDR=${GITEA__mailer__SMTP_ADDR:?GITEA__mailer__SMTP_ADDR not set}
+      - GITEA__mailer__SMTP_PORT=${GITEA__mailer__SMTP_PORT:?GITEA__mailer__SMTP_PORT not set}
+      - GITEA__mailer__USER=${GITEA__mailer__USER:-apikey}
+      - GITEA__mailer__PASSWD="""${GITEA__mailer__PASSWD:?GITEA__mailer__PASSWD not set}"""
+    volumes:
+      - gitea:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
       
   db:
     image: mysql:8
