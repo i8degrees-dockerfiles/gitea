@@ -1,0 +1,9 @@
+
+# symbolic links
+
+
+.env.secrets
+!.env
+!.env.dist
+!mounts/config/conf.d
+mounts/logs/*
