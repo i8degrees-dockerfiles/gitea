@@ -15,7 +15,9 @@ networks:
     external: true
     
 volumes:
-  gitea:
+  gitea_config:
+    driver: local
+  gitea_data:
     driver: local
   mysql:
     driver: local
@@ -36,8 +38,6 @@ services:
       # SSH
       - "222:22"
       #- "127.0.0.1:2222:22"
-    #labels:
-      #- 
     environment:
       - TZ=America/Chicago
       - LC_TIME=C.UTF-8
@@ -58,9 +58,12 @@ services:
       - GITEA__mailer__PASSWD="""${GITEA__mailer__PASSWD:?GITEA__mailer__PASSWD not set}"""
       - GITEA__security__SECRET_KEY=[value returned by generate secret SECRET_KEY]
       - GITEA__security__INTERNAL_TOKEN=[value returned by generate secret INTERNAL_TOKEN]
-      
     volumes:
-      - gitea:/data
+      # gitea config
+      - "./mounts/config:/data:rw"
+      #- gitea_config:/data
+      # git repos
+      - gitea_data:/var/lib/gitea
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
       
