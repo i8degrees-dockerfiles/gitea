@@ -21,7 +21,6 @@ volumes:
     driver: local
 
 services:
-
   server:
     image: gitea/gitea:@version@
     container_name: "gitea-1"
@@ -32,8 +31,11 @@ services:
       - traefik-proxy
       - gitea
     ports:
+      # gitea serve
       - "3000:3000"
+      # SSH
       - "222:22"
+      #- "127.0.0.1:2222:22"
     #labels:
       #- 
     environment:
