@@ -69,6 +69,7 @@ services:
       #- gitea_config:/var/lib/gitea/custom
       # git repos
       - gitea_data:/var/lib/gitea
+  # 1. https://docs.gitea.com/installation/database-prep
   db:
     image: "mysql:8"
     restart: always
