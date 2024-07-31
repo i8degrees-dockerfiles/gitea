@@ -4,7 +4,7 @@
 # docker run -it --rm  gitea/gitea:1 gitea generate secret INTERNAL_TOKEN
 #
 ---
-#version: "3"
+# version: "3"
 
 networks:
   gitea:
@@ -13,13 +13,17 @@ networks:
     driver: overlay
     attachable: true
     external: true
-    
+
 volumes:
   gitea_config:
     driver: local
+  # git repositories
   gitea_data:
     driver: local
+  # database used by gitea
   mysql:
+    driver: local
+  opengist_config:
     driver: local
 
 services:
@@ -28,7 +32,7 @@ services:
     container_name: "gitea-1"
     restart: always
     # 1. https://docs.gitea.com/installation/install-with-docker-rootless#custom-user
-    user: "1001" # id -u git
+    user: "1001"  # id -u git
     depends_on:
       - db
       - opengist
@@ -40,7 +44,7 @@ services:
       - "3000:3000"
       # SSH
       - "222:22"
-      #- "127.0.0.1:2222:22"
+      # - "127.0.0.1:2222:22"
     env_file:
       - ".env"
       - ".env.secrets"
@@ -66,7 +70,7 @@ services:
       # gitea config
       - "./mounts/config:/var/lib/gitea/custom:rw"
       # volume mounts
-      #- gitea_config:/var/lib/gitea/custom
+      # - gitea_config:/var/lib/gitea/custom
       # git repos
       - gitea_data:/var/lib/gitea
   # 1. https://docs.gitea.com/installation/database-prep
@@ -89,17 +93,19 @@ services:
       - gitea
       - traefik-proxy
     ports:
-      - "6157:6157" # HTTP port
-      - "2222:2222" # SSH port, can be removed if you don't use SSH
+      - "6157:6157"  # HTTP port
+      - "2222:2222"  # SSH port, can be removed if you don't use SSH
     volumes:
-      - "$HOME/.opengist:/opengist"
+      - opengist_config:/config
+      # repositories
+      - gitea_data:/opengist
     env_file:
       - ".env"
       - ".env.secrets"
     environment:
-      UID: 1001 # git
-      GID: 1001 # :git
+      UID: 1001  # git
+      GID: 1001  # :git
   # 1. https://codeberg.org/Codeberg/pages-server/src/branch/main
-  #pages:
-    #image:
+  # pages:
+    # image:
   
