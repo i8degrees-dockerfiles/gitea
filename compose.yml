@@ -98,3 +98,7 @@ services:
     environment:
       UID: 1001 # git
       GID: 1001 # :git
+  # 1. https://codeberg.org/Codeberg/pages-server/src/branch/main
+  #pages:
+    #image:
+  
