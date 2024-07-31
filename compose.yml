@@ -31,6 +31,7 @@ services:
     user: "1001" # id -u git
     depends_on:
       - db
+      - opengist
     networks:
       - traefik-proxy
       - gitea
@@ -68,9 +69,8 @@ services:
       #- gitea_config:/var/lib/gitea/custom
       # git repos
       - gitea_data:/var/lib/gitea
-      
   db:
-    image: mysql:8
+    image: "mysql:8"
     restart: always
     env_file:
       - ".env"
@@ -79,3 +79,22 @@ services:
       - gitea
     volumes:
       - mysql:/var/lib/mysql
+  # 1. https://github.com/thomiceli/opengist/blob/master/docs/installation.md
+  opengist:
+    image: "ghcr.io/thomiceli/opengist:1"
+    container_name: "opengist-1"
+    restart: unless-stopped
+    networks:
+      - gitea
+      - traefik-proxy
+    ports:
+      - "6157:6157" # HTTP port
+      - "2222:2222" # SSH port, can be removed if you don't use SSH
+    volumes:
+      - "$HOME/.opengist:/opengist"
+    env_file:
+      - ".env"
+      - ".env.secrets"
+    environment:
+      UID: 1001 # git
+      GID: 1001 # :git
