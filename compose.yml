@@ -34,6 +34,7 @@ services:
     image: "gitea/gitea:1.22.1"
     container_name: "gitea-1"
     restart: always
+    hostname: "gitea"
     # 1. https://docs.gitea.com/installation/install-with-docker-rootless#custom-user
     #user: "1000:1000"  # id -u git
     depends_on:
@@ -72,18 +73,26 @@ services:
     image: "mysql:8"
     container_name: "db-gitea-1"
     hostname: "db"
-    restart: always
+    restart: on-failure:2
     env_file:
       - ".env"
       - ".env.secrets"
+    ports:
+      - "3306:3306"
+      #- "127.0.0.1:3306:3306"
     networks:
       - gitea
     volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./mounts/config/mysql/my.cnf:/etc/my.cnf:ro"
+      - "./mounts/config/mysql/ssl:/etc/mysql/ssl:ro"
       - mysql:/var/lib/mysql
   # 1. https://github.com/thomiceli/opengist/blob/master/docs/installation.md
   opengist:
     image: "ghcr.io/thomiceli/opengist:1"
     container_name: "opengist-gitea-1"
+    hostname: "opengist"
     restart: unless-stopped
     networks:
       - gitea
@@ -92,6 +101,8 @@ services:
       - "6157:6157"  # HTTP port
       - "2222:2222"  # SSH port, can be removed if you don't use SSH
     volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - "/etc/localtime:/etc/localtime:ro"
       - opengist_config:/config
       # repositories
       - gitea_data:/opengist
