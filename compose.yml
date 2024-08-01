@@ -99,8 +99,8 @@ services:
       - ".env"
       - ".env.secrets"
     environment:
-      - UID: 1000  # git
-      - GID: 1000  # :git
+      UID: 1000  # git
+      GID: 1000  # :git
   # 1. https://codeberg.org/Codeberg/pages-server/src/branch/main
   # pages:
     # image:
