@@ -1,3 +1,4 @@
+# 0. https://hub.docker.com/r/gitea/gitea/tags
 # 1. https://docs.gitea.com/installation/install-with-docker
 # 2. https://docs.gitea.com/administration/repo-indexer
 # 3. https://docs.gitea.com/administration/customizing-gitea
@@ -30,11 +31,11 @@ volumes:
 
 services:
   server:
-    image: gitea/gitea:@version@
+    image: "gitea/gitea:1.22.1"
     container_name: "gitea-1"
     restart: always
     # 1. https://docs.gitea.com/installation/install-with-docker-rootless#custom-user
-    user: "1001"  # id -u git
+    user: "1000:1000"  # id -u git
     depends_on:
       - db
       - opengist
@@ -54,12 +55,6 @@ services:
       - USER_UID=1000
       - USER_GID=1000
       - GITEA__mailer__ENABLED=true
-      - GITEA__mailer__FROM=${GITEA__mailer__FROM:?GITEA__mailer__FROM not set}
-      - GITEA__mailer__PROTOCOL=smtps
-      - GITEA__mailer__SMTP_ADDR=${GITEA__mailer__SMTP_ADDR:?GITEA__mailer__SMTP_ADDR not set}
-      - GITEA__mailer__SMTP_PORT=${GITEA__mailer__SMTP_PORT:?GITEA__mailer__SMTP_PORT not set}
-      - GITEA__mailer__USER=${GITEA__mailer__USER:-apikey}
-      - GITEA__mailer__PASSWD="""${GITEA__mailer__PASSWD:?GITEA__mailer__PASSWD not set}"""
       - GITEA__security__SECRET_KEY=[value returned by generate secret SECRET_KEY]
       - GITEA__security__INTERNAL_TOKEN=[value returned by generate secret INTERNAL_TOKEN]
     volumes:
@@ -75,6 +70,8 @@ services:
   # 1. https://docs.gitea.com/installation/database-prep
   db:
     image: "mysql:8"
+    container_name: "db-gitea-1"
+    hostname: "db"
     restart: always
     env_file:
       - ".env"
@@ -86,7 +83,7 @@ services:
   # 1. https://github.com/thomiceli/opengist/blob/master/docs/installation.md
   opengist:
     image: "ghcr.io/thomiceli/opengist:1"
-    container_name: "opengist-1"
+    container_name: "opengist-gitea-1"
     restart: unless-stopped
     networks:
       - gitea
@@ -102,8 +99,8 @@ services:
       - ".env"
       - ".env.secrets"
     environment:
-      UID: 1001  # git
-      GID: 1001  # :git
+      - UID: 1000  # git
+      - GID: 1000  # :git
   # 1. https://codeberg.org/Codeberg/pages-server/src/branch/main
   # pages:
     # image:
