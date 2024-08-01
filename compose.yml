@@ -35,7 +35,7 @@ services:
     container_name: "gitea-1"
     restart: always
     # 1. https://docs.gitea.com/installation/install-with-docker-rootless#custom-user
-    user: "1000:1000"  # id -u git
+    #user: "1000:1000"  # id -u git
     depends_on:
       - db
       - opengist
