@@ -16,8 +16,9 @@ cp -av .env.secrets.dist .env.secrets
 docker compose up -d
 docker compose ps
 # 4. first-boot setup of gitea
-xdg-open "http://localhost:3000"
+xdg-open "http://localhost:3000"  # gitea
 # 5. register CNAME or A records with DNS provisioner -- PowerDNS with native database replication is the back-end that I personally use for this
+xdg-open "http://localhost:3001"  # gists
 # 6. profit! $$$
 ```
 
@@ -30,4 +31,46 @@ docker compose logs
 docker exec -it gitea-1 sh
 ```
 
+### import repositories from github
+
+First, you must generate a **READ-ONLY** [Github Token][1] that has permissions to read from your repositories, at minimum. If you wish to include the Wikis, Issues, Projects and such
+with the migration, you must ensure that this token also
+has *read* permissions for these items, too.
+
+Additionally, you must create a [Gitea Token][2] that
+also has the appropiate permissions for accessing your
+repositories. This token must include **WRITE** 
+permissions as it will be uploading the migrated 
+repositories to your Gitea host.
+
+You may need to create a token for each organization 
+that you are importing for fine-grained access.
+
+
+```shell
+GITHUB_REPO="i8degrees-dockerfiles/traefik"
+GITEA_URL="http://docker.fs1.home:3000"
+GITEA_TOKEN=
+GITHUB_TOKEN=
+docker run ggmigrator/cli migrate --owner 1 \
+  --gh-repo "$GITHUB_REPO" \
+  --gh-token "$GITHUB_TOKEN" \
+  --url "$GITEA_URL" --token "$GITEA_TOKEN"
+```
+
+```shell
+GITHUB_USER="i8degrees"  # bootygeeks, haxxin, syn-net, etc
+GITEA_URL="http://docker.fs1.home:3000"
+GITEA_TOKEN=
+GITHUB_TOKEN=
+docker run ggmigrator/cli migrate-all --owner 1 \
+  --gh-user "$GITHUB_USER" --gh-token "$GITHUB_TOKEN" \
+  --url "$GITEA_URL" --token "$GITEA_TOKEN"
+```
+
 ## reference documents 
+
+[1]: https://github.com/settings/tokens
+[2]: http://docker.fs1.home:3000/user/settings/applications
+[3]: https://gitea.com/gitea/migrator
+

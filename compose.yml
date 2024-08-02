@@ -1,10 +1,19 @@
-# 0. https://hub.docker.com/r/gitea/gitea/tags
+# Gitea service representation as Docker containers
+#
+# This file includes a complete setup of Gitea [1], 
+# MySQL [2], and OpenGists [8]. Someday, perhaps also a 
+# Pages server via Codeberg Pages [7].
+#
+# SEE ALSO
+#
 # 1. https://docs.gitea.com/installation/install-with-docker
-# 2. https://docs.gitea.com/administration/repo-indexer
-# 3. https://docs.gitea.com/administration/customizing-gitea
-# 4. https://docs.gitea.com/administration/external-renderers
-# docker run -it --rm gitea/gitea:1 gitea generate secret SECRET_KEY
-# docker run -it --rm  gitea/gitea:1 gitea generate secret INTERNAL_TOKEN
+# 2. https://docs.gitea.com/installation/database-prep
+# 3. https://docs.gitea.com/administration/repo-indexer
+# 4. https://docs.gitea.com/administration/customizing-gitea
+# 5. https://docs.gitea.com/administration/external-renderers
+# 6. https://git.jonasfranz.software/JonasFranzDEV/gitea-github-migrator
+# 7. https://docs.codeberg.org/codeberg-pages/
+# 8. https://github.com/thomiceli/opengist/blob/master/docs/installation.md
 #
 ---
 # version: "3"
@@ -31,11 +40,11 @@ volumes:
 
 services:
   server:
+    # https://hub.docker.com/r/gitea/gitea/tags
     image: "gitea/gitea:1.22.1"
     container_name: "gitea-1"
     restart: always
     hostname: "gitea"
-    # 1. https://docs.gitea.com/installation/install-with-docker-rootless#custom-user
     #user: "1000:1000"  # id -u git
     depends_on:
       - db
@@ -44,10 +53,8 @@ services:
       - traefik-proxy
       - gitea
     ports:
-      # gitea serve
-      - "3000:3000"
-      # SSH
-      - "222:22"
+      - "3000:3000"  # gitea serve
+      - "222:22"  # SSH
       # - "127.0.0.1:2222:22"
     env_file:
       - ".env"
@@ -55,7 +62,6 @@ services:
     environment:
       - USER_UID=1000
       - USER_GID=1000
-      - GITEA__mailer__ENABLED=true
       - GITEA__security__SECRET_KEY=[value returned by generate secret SECRET_KEY]
       - GITEA__security__INTERNAL_TOKEN=[value returned by generate secret INTERNAL_TOKEN]
     volumes:
@@ -68,27 +74,26 @@ services:
       # - gitea_config:/var/lib/gitea/custom
       # git repos
       - gitea_data:/var/lib/gitea
-  # 1. https://docs.gitea.com/installation/database-prep
   db:
     image: "mysql:8"
     container_name: "db-gitea-1"
     hostname: "db"
-    restart: on-failure:2
+    restart: unless-stopped
     env_file:
       - ".env"
       - ".env.secrets"
     ports:
-      - "3306:3306"
-      #- "127.0.0.1:3306:3306"
+      - "3306:3306"  # mysqld
+      #- "127.0.0.1:3306:3306"  # mysqld
     networks:
       - gitea
+      #- traefik-proxy
     volumes:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
       - "./mounts/config/mysql/my.cnf:/etc/my.cnf:ro"
       - "./mounts/config/mysql/ssl:/etc/mysql/ssl:ro"
       - mysql:/var/lib/mysql
-  # 1. https://github.com/thomiceli/opengist/blob/master/docs/installation.md
   opengist:
     image: "ghcr.io/thomiceli/opengist:1"
     container_name: "opengist-gitea-1"
@@ -98,8 +103,8 @@ services:
       - gitea
       - traefik-proxy
     ports:
-      - "6157:6157"  # HTTP port
-      - "2222:2222"  # SSH port, can be removed if you don't use SSH
+      - "3001:6157"  # HTTP
+      - "2222:2222"  # SSH
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - "/etc/localtime:/etc/localtime:ro"
@@ -110,8 +115,4 @@ services:
     environment:
       UID: 1000  # git
       GID: 1000  # :git
-  # 1. https://codeberg.org/Codeberg/pages-server/src/branch/main
-  # pages:
-    # image:
   
-  # 1. https://git.jonasfranz.software/JonasFranzDEV/gitea-github-migrator
