@@ -1,6 +1,8 @@
 
 # symbolic links
-
+gitea.ini
+my.cnf
+mysql_ssl
 
 .env.secrets
 !.env
