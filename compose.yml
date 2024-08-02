@@ -26,7 +26,7 @@ volumes:
   # database used by gitea
   mysql:
     driver: local
-  opengist_config:
+  opengist_data:
     driver: local
 
 services:
@@ -63,7 +63,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
       # gitea config
-      - "./mounts/config:/var/lib/gitea/custom:rw"
+      - "./mounts/config/gitea:/var/lib/gitea/custom:rw"
       # volume mounts
       # - gitea_config:/var/lib/gitea/custom
       # git repos
@@ -103,9 +103,7 @@ services:
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - "/etc/localtime:/etc/localtime:ro"
-      - opengist_config:/config
-      # repositories
-      - gitea_data:/opengist
+      - opengist_data:/opengist
     env_file:
       - ".env"
       - ".env.secrets"
