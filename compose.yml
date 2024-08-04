@@ -115,4 +115,13 @@ services:
     environment:
       UID: 1000  # git
       GID: 1000  # :git
-  
+#jenkins:
+  #image: jenkins:2.7.4-alpine
+  #labels:
+    #- "traefik.backend=jenkins"
+    #- "traefik.frontend.rule=Host:localhost"
+    #- "traefik.port=8080"
+  #environment:
+    #- JAVA_OPTS=-Xmx256m -Dhudson.DNSMultiCast.disabled=true
+  #expose:
+    #- "8080"
