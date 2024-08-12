@@ -68,7 +68,28 @@ docker run ggmigrator/cli migrate-all --owner 1 \
   --url "$GITEA_URL" --token "$GITEA_TOKEN"
 ```
 
-## reference documents 
+## TODO
+
+- [ ] sort out which configuration files gitea is using and then merge
+  * `./mounts/config/gitea/gitea.ini`
+  * `./mounts/config/gitea/conf/app.ini`
+
+- [ ] provision external authentication with Gitea via [OAuth Providers](https://github.com/thomiceli/opengist/blob/master/docs/administration/oauth-providers.md)
+
+- [ ] finish our *Github* to **Gitea** repository imports
+  * `/scripts/`
+- [ ] finish our *Github Gist* to **OpenGist** repository imports
+  * `/scripts/`
+
+# scratchpad
+
+## gitea
+## db
+## opengist
+
+`apk add curl git git-lfs bash vim ncdu`
+
+## reference documents
 
 [1]: https://github.com/settings/tokens
 [2]: http://docker.fs1.home:3000/user/settings/applications

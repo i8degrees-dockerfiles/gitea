@@ -1,5 +1,6 @@
 
-# symbolic links
+# links
+gist.yml
 gitea.ini
 my.cnf
 mysql_ssl
@@ -8,7 +9,7 @@ mysql_ssl
 !.env
 !.env.dist
 !mounts/config/conf.d
-mounts/logs/*
+mounts/logs/**
 mounts/config/sessions
 !mounts/config/mysql/ssl/rootCA.crt
 !mounts/config/mysql/ssl/rootCA_intermediate.crt
@@ -16,3 +17,4 @@ mounts/config/mysql/ssl/mysql.pem
 mounts/config/mysql/ssl/mysql.crt
 mounts/config/mysql/ssl/mysql.key
 
+tmp/**

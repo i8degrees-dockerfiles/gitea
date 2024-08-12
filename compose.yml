@@ -13,7 +13,10 @@
 # 5. https://docs.gitea.com/administration/external-renderers
 # 6. https://git.jonasfranz.software/JonasFranzDEV/gitea-github-migrator
 # 7. https://docs.codeberg.org/codeberg-pages/
+# OPENGIST
 # 8. https://github.com/thomiceli/opengist/blob/master/docs/installation.md
+# 9. https://github.com/thomiceli/opengist/tree/master
+# 10. https://github.com/thomiceli/opengist/blob/master/docs/configuration/index.md#configuration
 #
 ---
 # version: "3"
@@ -35,6 +38,7 @@ volumes:
   # database used by gitea
   mysql:
     driver: local
+  # repositories
   opengist_data:
     driver: local
 
@@ -66,14 +70,23 @@ services:
       - GITEA__security__INTERNAL_TOKEN=[value returned by generate secret INTERNAL_TOKEN]
     volumes:
       # bind mounts
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./scripts:/scripts:ro"
       # gitea config
       - "./mounts/config/gitea:/var/lib/gitea/custom:rw"
       # volume mounts
       # - gitea_config:/var/lib/gitea/custom
       # git repos
       - gitea_data:/var/lib/gitea
+      #- gitea_data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gitea.entrypoints=websecure"
+      - "traefik.http.routers.gitea.rule=Host(`git.fs1.home`) && PathPrefix(`/`)"
+      - "traefik.http.services.gitea.loadbalancer.server.port=3000"
+      - "traefik.http.routers.gitea.tls.certresolver=staging-web-acme"
+      - "traefik.http.routers.gitea.service=gitea"
   db:
     image: "mysql:8"
     container_name: "db-gitea-1"
@@ -94,6 +107,8 @@ services:
       - "./mounts/config/mysql/my.cnf:/etc/my.cnf:ro"
       - "./mounts/config/mysql/ssl:/etc/mysql/ssl:ro"
       - mysql:/var/lib/mysql
+    labels:
+      - "traefik.enable=false"
   opengist:
     image: "ghcr.io/thomiceli/opengist:1"
     container_name: "opengist-gitea-1"
@@ -106,8 +121,14 @@ services:
       - "3001:6157"  # HTTP
       - "2222:2222"  # SSH
     volumes:
-      - /etc/timezone:/etc/timezone:ro
+      # bind mounts
+      - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
+      - "./scripts:/scripts:ro"
+      - "./mounts/config/gist/config.yml:/config.yml:ro"
+      # TODO(JEFF): LOGS
+      #- ./mounts/logs/gist/opengist.log
+      # named volumes
       - opengist_data:/opengist
     env_file:
       - ".env"
@@ -115,4 +136,11 @@ services:
     environment:
       UID: 1000  # git
       GID: 1000  # :git
-  
+      OG_LOG_LEVEL: "info"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gist.entrypoints=websecure"
+      - "traefik.http.routers.gist.rule=Host(`gist.fs1.home`) && PathPrefix(`/`)"
+      - "traefik.http.services.gist.loadbalancer.server.port=6157"
+      - "traefik.http.routers.gist.tls.certresolver=staging-web-acme"
+      - "traefik.http.routers.gist.service=gist"
