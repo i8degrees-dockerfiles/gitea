@@ -1,6 +1,13 @@
 
 # gitea
 
+Access Portals
+|Internal URL|External URL|Notes|
+|------------|------------|-----|
+|http://docker.fs1.home:3000|https://git.fs1.home|Gitea|
+|http://docker.fs1.home:3001|https://gist.fs1.home|OpenGist|
+|http://docker.fs1.home:3002|https://buildbox.fs1.home|Jenkins build node|
+
 ## usage
 
 ```shell

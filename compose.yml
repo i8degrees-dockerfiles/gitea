@@ -1,7 +1,7 @@
 # Gitea service representation as Docker containers
 #
-# This file includes a complete setup of Gitea [1], 
-# MySQL [2], and OpenGists [8]. Someday, perhaps also a 
+# This file includes a complete setup of Gitea [1],
+# MySQL [2], and OpenGists [8]. Someday, perhaps also a
 # Pages server via Codeberg Pages [7].
 #
 # SEE ALSO
@@ -144,3 +144,35 @@ services:
       - "traefik.http.services.gist.loadbalancer.server.port=6157"
       - "traefik.http.routers.gist.tls.certresolver=staging-web-acme"
       - "traefik.http.routers.gist.service=gist"
+  jenkins:
+    restart: unless-stopped
+    image: "jenkins:2.7.4-alpine"
+    hostname: "jenkins"
+    container_name: "jenkins-gitea-1"
+    ports:
+      - "3002:8080" # HTTP
+      - "2244:22"  # SSH (optional)
+    networks:
+      - gitea
+      - traefik-proxy
+    env_file:
+      - ".env"
+      - ".env.secrets"
+    volumes:
+      # bind mounts
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./scripts:/scripts:ro"
+      #- "./mounts/config/jenkins:/config:ro"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jenkins.entrypoints=websecure"
+      - "traefik.http.routers.jenkins.rule=Host(`buildbox.fs1.home`) && PathPrefix(`/`)"
+      # Host(`buildbox-1.fs1.home`) && PathPrefix(`/`)
+      - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+      - "traefik.http.routers.jenkins.tls.certresolver=staging-web-acme"
+      - "traefik.http.routers.jenkins.service=jenkins"
+    environment:
+      - "JAVA_OPTS=-Xmx256m -Dhudson.DNSMultiCast.disabled=true"
+    expose:
+      - "8080"
