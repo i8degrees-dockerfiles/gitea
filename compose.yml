@@ -87,6 +87,11 @@ services:
       - "traefik.http.services.gitea.loadbalancer.server.port=3000"
       - "traefik.http.routers.gitea.tls.certresolver=staging-web-acme"
       - "traefik.http.routers.gitea.service=gitea"
+      #
+      - "homepage.group=syn"
+      - "homepage.name=gitea-1"
+      - "homepage.siteMonitor=http://docker.fs1.home:3000/"
+      - "homepage.ping=docker.fs1.home"
   db:
     image: "mysql:8"
     container_name: "db-gitea-1"
@@ -144,6 +149,11 @@ services:
       - "traefik.http.services.gist.loadbalancer.server.port=6157"
       - "traefik.http.routers.gist.tls.certresolver=staging-web-acme"
       - "traefik.http.routers.gist.service=gist"
+      #
+      - "homepage.group=syn"
+      - "homepage.name=opengist-gitea-1"
+      - "homepage.siteMonitor=http://docker.fs1.home:3001/"
+      - "homepage.ping=docker.fs1.home"
   jenkins:
     restart: unless-stopped
     image: "jenkins:2.7.4-alpine"
@@ -172,6 +182,11 @@ services:
       - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
       - "traefik.http.routers.jenkins.tls.certresolver=staging-web-acme"
       - "traefik.http.routers.jenkins.service=jenkins"
+      #
+      - "homepage.group=syn"
+      - "homepage.name=jenkins-gitea-1"
+      - "homepage.siteMonitor=http://docker.fs1.home:3002/"
+      - "homepage.ping=docker.fs1.home"
     environment:
       - "JAVA_OPTS=-Xmx256m -Dhudson.DNSMultiCast.disabled=true"
     expose:
